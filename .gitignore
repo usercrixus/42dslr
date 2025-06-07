@@ -1,1 +1,5 @@
 venv
+histograms
+pair_plots
+scatter
+**/__pycache__
