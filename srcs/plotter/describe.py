@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import argparse
-import csv
 import math
-import datetime
+import pandas as pd
 
 # --- Statistic functions implemented from scratch ---
 def stat_count(values):
@@ -52,10 +51,10 @@ def stat_max(values):
 
 
 def stat_variance(values):
-    """Return the sample variance (ddof=1)."""
-    if not values:
-        return float('nan')
+    """Return the population variance (divide by n)."""
     n = stat_count(values)
+    if n == 0:
+        return float('nan')
     mean = stat_mean(values)
     s = 0.0
     for v in values:
@@ -64,22 +63,45 @@ def stat_variance(values):
 
 
 def stat_std(values):
-    """Return the sample standard deviation."""
+    """Return the population standard deviation."""
     return math.sqrt(stat_variance(values))
 
 
 def stat_percentile(values, percentile):
-    """Return the given percentile (0-100) using interpolation."""
+    """Return the given percentile (0-100) using nearest-rank method."""
     n = stat_count(values)
     if n == 0:
         return float('nan')
     sorted_vals = sorted(values)
-    rank = math.ceil(percentile / 100 * n)
-    if rank >= n:
-        return sorted_vals[-1]
-    return sorted_vals[rank]
+    # nearest-rank position (1-based), then convert to 0-based
+    pos = math.ceil(percentile / 100 * n) - 1
+    pos = max(0, min(pos, n-1))
+    return sorted_vals[pos]
 
-# Mapping of statistic names to functions
+# --- Columns to read ---
+SELECTED_FEATURES = [
+    'Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
+    'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
+    'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms', 'Flying',
+    'Birthday', 'Best Hand'
+]
+
+# --- Load and preprocess CSV with pandas ---
+def load_and_prepare(path):
+    """
+    Read the CSV using pandas, keep only SELECTED_FEATURES,
+    convert Birthday to epoch seconds, and Best Hand to numeric.
+    """
+    df = pd.read_csv(path, usecols=SELECTED_FEATURES)
+    # Convert Birthday to seconds since epoch
+    df['Birthday'] = (pd.to_datetime(df['Birthday'], errors='coerce').astype('int64') // 10**9)
+    # Map Best Hand to numeric
+    df['Best Hand'] = df['Best Hand'].map({'Left': 1.0, 'Right': 0.0})
+    # Fill any missing entries with 0 to ensure equal length
+    df = df.fillna(0)
+    return df
+
+# --- Mapping statistic names to functions ---
 STAT_FUNCS = {
     'count': stat_count,
     'mean': stat_mean,
@@ -91,107 +113,33 @@ STAT_FUNCS = {
     'max': stat_max,
 }
 
-def parse_birthday(val):
-    """Convert ISO date string to seconds since epoch."""
-    try:
-        dt = datetime.datetime.fromisoformat(val)
-        return int(dt.replace(tzinfo=datetime.timezone.utc).timestamp())
-    except Exception:
-        return None
+# --- Format and print the table ---
+def format_statistics(df):
+    """Compute and print descriptive statistics for each column."""
+    STATS = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
+    # Build a DataFrame by applying our custom functions directly into rows
+    # Build a dict of raw numbers by applying our custom functions directly
+    # Use full lists (including zeros) so counts are equal
+    stats_dict = {
+        stat: [STAT_FUNCS[stat](df[col].tolist()) for col in df.columns] for stat in STATS
+    }
+    # Create DataFrame with features as rows and stats as columns
+    stats_df = pd.DataFrame(stats_dict, index=df.columns)
+    # Replace any missing (NaN) values with 0 to maintain a perfect matrix
+    stats_df = stats_df.fillna(0)
+    # Print with six-decimal formatting
+    print(stats_df.to_string(float_format="{:.6f}".format))
 
-
-def parse_best_hand(val):
-    """Map 'Left'->1, 'Right'->0."""
-    if val.lower() == 'left':
-        return 1.0
-    if val.lower() == 'right':
-        return 0.0
-    return None
-
-def load_selected_numeric_csv(path):
-    """Load CSV, drop 'Index', keep only selected features with numeric parsing."""
-    # --- CSV loading and selecting only specified features ---
-    SELECTED_FEATURES = [
-        'Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-        'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-        'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms', 'Flying',
-        'Birthday', 'Best Hand'
-    ]
-    with open(path, newline='') as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        columns = [col for col in header if col in SELECTED_FEATURES]
-        data = {col: [] for col in columns}
-        for row in reader:
-            for col, val in zip(header, row):
-                if col in columns:
-                    num = None
-                    if col == 'Birthday':
-                        num = parse_birthday(val)
-                    elif col == 'Best Hand':
-                        num = parse_best_hand(val)
-                    else:
-                        try:
-                            num = float(val)
-                        except ValueError:
-                            num = 0
-                    data[col].append(num)
-    return columns, data
-
-# --- Table formatting with aligned decimal points ---
-def format_statistics(columns, data):
-    """Compute and format stats for each numeric column with decimal alignment."""
-    stats_order = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
-    # Compute stat values
-    values = {stat: [STAT_FUNCS[stat](data[col]) for col in columns] for stat in stats_order}
-    # Compute widths for integer part and total width per column
-    int_width = {}
-    for col in columns:
-        # Determine max integer-width before decimal
-        max_int = 0
-        for stat in stats_order:
-            s = f"{values[stat][columns.index(col)]:.6f}"
-            int_part = s.split('.')[0]
-            if len(int_part) > max_int:
-                max_int = len(int_part)
-        int_width[col] = max_int
-    # Total column width: int + '.' + 6 decimals or header length
-    col_width = {}
-    for col in columns:
-        header_len = len(col)
-        total = int_width[col] + 1 + 6
-        col_width[col] = max(header_len, total)
-    # Label column width
-    label_width = max(len(s) for s in stats_order)
-    # Build lines
-    lines = []
-    # Header line
-    header_line = ' ' * (label_width + 1) + ' ' + ' '.join(col.rjust(col_width[col]) for col in columns)
-    lines.append(header_line)
-    # Stat rows
-    for stat in stats_order:
-        row_cells = []
-        for col in columns:
-            val = values[stat][columns.index(col)]
-            s = f"{val:.6f}"
-            ip, fp = s.split('.')
-            ip = ip.rjust(int_width[col])
-            cell = ip + '.' + fp
-            cell = cell.rjust(col_width[col])
-            row_cells.append(cell)
-        row = stat.rjust(label_width) + ' ' + ' '.join(row_cells)
-        lines.append(row)
-    return '\n'.join(lines)
-
-# --- Main entry point ---
+# --- Main ---
 def main():
-    parser = argparse.ArgumentParser( description='Compute descriptive statistics for specified CSV fields without built-ins.')
+    parser = argparse.ArgumentParser(
+        description='Compute descriptive statistics for selected CSV fields.'
+    )
     parser.add_argument('csv_file', help='Path to the CSV file')
     args = parser.parse_args()
 
-    columns, data = load_selected_numeric_csv(args.csv_file)
-    table = format_statistics(columns, data)
-    print(table)
+    df = load_and_prepare(args.csv_file)
+    format_statistics(df)
 
 if __name__ == '__main__':
     main()
