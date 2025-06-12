@@ -1,1 +1,0 @@
-"Here your class to do prediction (infer in french => deduction)"
