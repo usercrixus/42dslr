@@ -35,21 +35,21 @@ if __name__ == "__main__":
         print("Usage: python3 mainTrain.py <dataset.csv>")
         sys.exit(1)
 
-    input_path = sys.argv[1]
+    inputPath = sys.argv[1]
 
     labels = ["Ravenclaw", "Slytherin", "Hufflepuff", "Gryffindor"]
-    X, Y = load_data_from_csv(input_path)
+    inputs, inputsLabel = load_data_from_csv(inputPath)
 
-    X_mean = X.mean(axis=0)
-    X_std = X.std(axis=0) + 1e-8
-    X = (X - X_mean) / X_std
+    inputMean = inputs.mean(axis=0)
+    inputStd = inputs.std(axis=0) + 1e-8
+    inputs = (inputs - inputMean) / inputStd
 
-    model = LogisticRegression(inputDim=X.shape[1], labels=labels)
-    model.train(X, Y, epochs=100, lr=0.1)
+    model = LogisticRegression(inputDim=inputs.shape[1], labels=labels)
+    model.train(inputs, inputsLabel, epochs=100, lr=0.1)
 
     # Save model parameters and normalization
     np.save("model_weights.npy", model.layer.weights)
     np.save("model_bias.npy", model.layer.biais)
     np.save("model_labels.npy", np.array(labels))
-    np.save("X_mean.npy", X_mean)
-    np.save("X_std.npy", X_std)
+    np.save("X_mean.npy", inputMean)
+    np.save("X_std.npy", inputStd)
