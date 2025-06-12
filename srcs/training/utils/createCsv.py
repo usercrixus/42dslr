@@ -1,6 +1,9 @@
 import pandas as pd
+import os
 
 def createCsv():
+	if os.path.exists('dataset.csv'):
+		return
 	data = {
     'Id': [1, 2, 3, 4],
     'Biais': [0, 0, 0, 0],

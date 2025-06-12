@@ -6,6 +6,7 @@ def main():
 	df_normalized = normalize("../../datasets/dataset_train.csv")
 	createCsv()
 	training(df_normalized)
+	return
 
 if __name__=='__main__':
     main()
