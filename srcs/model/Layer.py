@@ -14,12 +14,3 @@ class Layer:
     def infer(self, input: np.ndarray) -> np.ndarray:
         predictions = np.dot(self.weights, input) + self.biais
         return self.softmax(predictions)
-
-    def backprop(self, input: np.ndarray, trueLabelVector: np.ndarray, probabilities: np.ndarray, lr: float):
-
-        deltas = probabilities - trueLabelVector
-        gradientWeight = np.outer(deltas, input)
-        gradientBiai = deltas 
-
-        self.weights -= lr * gradientWeight
-        self.biais -= lr * gradientBiai

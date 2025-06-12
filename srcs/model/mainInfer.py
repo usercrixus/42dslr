@@ -45,5 +45,6 @@ if __name__ == "__main__":
     model.layer.biais = biais
 
     predictions = model.predict(input)
+    print("Index,Hogwarts House")
     for i, pred in enumerate(predictions):
-        print(f"Sample {i}: {pred}")
+        print(f"{i},{pred}")

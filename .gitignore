@@ -3,3 +3,4 @@ histograms
 pair_plots
 scatter
 **/__pycache__
+*.npy

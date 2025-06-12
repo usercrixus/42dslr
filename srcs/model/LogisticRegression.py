@@ -6,28 +6,48 @@ class LogisticRegression:
         self.labels = labels
         self.layer = Layer(inputDim, len(labels), labels)
 
-    def train(self, inputs: np.ndarray, labels: list[str], epochs: int, lr: float):
-
-        numSamples = inputs.shape[0]
+    def train(self, inputTrain: np.ndarray, labelTrain: list[str], inputVal: np.ndarray, labelVal: list[str], epochs: int, lr: float, batch_size: int = 32):
+        numSamples = inputTrain.shape[0]
 
         for epoch in range(epochs):
+            indices = np.arange(numSamples)
+            np.random.shuffle(indices)
+
             totalLoss = 0
-            for i in range(numSamples):
-                input = inputs[i]
-                trueLabel = labels[i]
+            for start in range(0, numSamples, batch_size):
+                end = min(start + batch_size, numSamples)
+                batchIndices = indices[start:end]
 
-                probabilities = self.layer.infer(input)
+                gradW = np.zeros_like(self.layer.weights)
+                gradB = np.zeros_like(self.layer.biais)
 
-                trueLabelVector = np.zeros(len(self.labels))
-                trueLabelVector[self.layer.labelToIndex[trueLabel]] = 1
+                for i in batchIndices:
+                    input = inputTrain[i]
+                    trueLabel = labelTrain[i]
 
-                loss = -np.sum(trueLabelVector * np.log(probabilities + 1e-8))
-                totalLoss += loss
+                    probabilities = self.layer.infer(input)
+                    trueLabelVector = np.zeros(len(self.labels))
+                    trueLabelVector[self.layer.labelToIndex[trueLabel]] = 1
 
-                self.layer.backprop(input, trueLabelVector, probabilities, lr)
+                    loss = -np.sum(trueLabelVector * np.log(probabilities + 1e-8))
+                    totalLoss += loss
+
+                    deltas = probabilities - trueLabelVector
+                    gradW += np.outer(deltas, input)
+                    gradB += deltas
+
+                self.layer.weights -= lr * (gradW / len(batchIndices))
+                self.layer.biais -= lr * (gradB / len(batchIndices))
 
             avgLoss = totalLoss / numSamples
-            print(f"Epoch {epoch + 1} | Loss: {avgLoss:.4f}")
+            val_acc = self.compute_accuracy(inputVal, labelVal)
+            print(f"Epoch {epoch + 1} | Loss: {avgLoss:.4f} | Val Accuracy: {val_acc * 100:.2f}%")
+
+
+    def compute_accuracy(self, X: np.ndarray, y: list[str]) -> float:
+        predictions = self.predict(X)
+        correct = sum(pred == true for pred, true in zip(predictions, y))
+        return correct / len(y)
 
 
     def predict(self, input: np.ndarray) -> list[str]:
