@@ -46,12 +46,6 @@ def trainValSplit(inputs: np.ndarray, labels: list[str], train_ratio=0.9):
     return X_train, y_train, X_val, y_val
 
 
-def computeAccuracy(model: LogisticRegression, X_val: np.ndarray, y_val: list[str]) -> float:
-    predictions = model.predict(X_val)
-    correct = sum(pred == true for pred, true in zip(predictions, y_val))
-    return correct / len(y_val)
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python3 mainTrain.py <dataset.csv>")
