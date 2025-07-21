@@ -7,11 +7,11 @@ class LogisticRegression:
         self.layer = Layer(inputDim, len(labels), labels)
 
     def train(self, inputTrain: np.ndarray, labelTrain: list[str], inputVal: np.ndarray, labelVal: list[str], epochs: int, lr: float, batch_size: int = 32):
-        numSamples = inputTrain.shape[0]
+        numSamples = inputTrain.shape[0] # number of input in the train set
 
         for epoch in range(epochs):
             indices = np.arange(numSamples)
-            np.random.shuffle(indices)
+            np.random.shuffle(indices) # random the set for of input for better training
 
             totalLoss = 0
             for start in range(0, numSamples, batch_size):
@@ -27,17 +27,17 @@ class LogisticRegression:
 
                     probabilities = self.layer.infer(input)
                     trueLabelVector = np.zeros(len(self.labels))
-                    trueLabelVector[self.layer.labelToIndex[trueLabel]] = 1
+                    trueLabelVector[self.layer.labelToIndex[trueLabel]] = 1 # we create a vector where all label are 0 exepect the true one (example [0, 0, 1, 0])
 
                     loss = -np.sum(trueLabelVector * np.log(probabilities + 1e-8))
                     totalLoss += loss
 
                     deltas = probabilities - trueLabelVector
-                    gradW += np.outer(deltas, input)
-                    gradB += deltas
+                    gradW += np.outer(deltas, input) # charge buffer
+                    gradB += deltas # charge buffer
 
-                self.layer.weights -= lr * (gradW / len(batchIndices))
-                self.layer.biais -= lr * (gradB / len(batchIndices))
+                self.layer.weights -= lr * (gradW / len(batchIndices)) # update
+                self.layer.biais -= lr * (gradB / len(batchIndices)) # update
 
             avgLoss = totalLoss / numSamples
             val_acc = self.compute_accuracy(inputVal, labelVal)
