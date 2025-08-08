@@ -1,4 +1,4 @@
-import argparse
+import sys
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -30,23 +30,9 @@ def plots_histograms(df: pd.DataFrame, output_dir: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Generate histograms for each numeric feature in the CSV'
-    )
-    parser.add_argument('csv_file', help='Path to the CSV file')
-    args = parser.parse_args()
-
-    # Load and prepare the DataFrame
-    df = load_and_prepare(args.csv_file)
-    # Drop unwanted metadata columns
-    df = df.drop(columns=[
-        'Index',
-        'First Name',
-        'Last Name',
-        'Best Hand'
-    ], errors='ignore')
-
-    # Generate and save histograms
+    if len(sys.argv) != 2:
+        return
+    df = load_and_prepare(sys.argv[1])
     plots_histograms(df, "histograms")
 
 

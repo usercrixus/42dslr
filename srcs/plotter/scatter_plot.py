@@ -1,4 +1,4 @@
-import argparse
+import sys
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -12,7 +12,7 @@ def find_most_similar_features(df: pd.DataFrame) -> tuple[str, str, float]:
     with the highest absolute correlation along with the correlation value.
     """
     # Exclude Hogwarts House from feature correlations if present
-    feat_df = df.drop(columns=['Hogwarts House'], errors='ignore')
+    feat_df = df.drop(columns=["Hogwarts House"], errors="ignore")
 
     corr = feat_df.corr()
     corr_abs = corr.abs()
@@ -42,26 +42,16 @@ def plot_scatter(df: pd.DataFrame, feat_x: str, feat_y: str, output_dir: str) ->
     plt.grid(True)
     plt.tight_layout()
 
-    plt.savefig(filepath, dpi=300, bbox_inches='tight')
+    plt.savefig(filepath, dpi=300, bbox_inches="tight")
     plt.close()
 
     return filepath
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate a single scatter plot for the two most similar features')
-    parser.add_argument('csv_file', help='Path to the CSV file')
-    args = parser.parse_args()
-
-    # Load and prepare data
-    df = load_and_prepare(args.csv_file)
-    # Drop unwanted columns if they exist
-    df = df.drop(columns=[
-        'Index',
-        'First Name',
-        'Last Name',
-        'Best Hand'
-    ], errors='ignore')
+    if len(sys.argv) != 2:
+        return
+    df = load_and_prepare(sys.argv[1])
 
     # Find most correlated features
     feat_x, feat_y, corr_val = find_most_similar_features(df)
@@ -72,5 +62,5 @@ def main():
     print(f"Saved scatter plot to {saved_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

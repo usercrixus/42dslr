@@ -1,4 +1,4 @@
-import argparse
+import sys
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -29,25 +29,9 @@ def plot_pair_matrix(feature_df: pd.DataFrame, output_dir: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Generate a clean scatter matrix for selected features'
-    )
-    parser.add_argument('csv_file', help='Path to CSV file')
-    args = parser.parse_args()
-
-    # Load and prepare data
-    df = load_and_prepare(args.csv_file)
-    # Drop unwanted metadata columns
-    df = df.drop(columns=[
-        'Index',
-        'First Name',
-        'Last Name',
-        'Best Hand'
-    ], errors='ignore')
-
-    # Prepare data for pair plot
-
-    # Plot and save
+    if len(sys.argv) != 2:
+        return
+    df = load_and_prepare(sys.argv[1])
     plot_pair_matrix(df, "pair_plots")
 
 
