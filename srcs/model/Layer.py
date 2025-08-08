@@ -1,7 +1,8 @@
 import numpy as np
 
+
 class Layer:
-    def __init__(self, inputDim: int, numClasses: int, labels:list[str]):
+    def __init__(self, inputDim: int, numClasses: int, labels: list[str]):
         self.weights = np.random.randn(numClasses, inputDim)
         self.biais = np.zeros(numClasses)
         self.labelToIndex = {label: idx for idx, label in enumerate(labels)}
