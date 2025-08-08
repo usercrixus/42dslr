@@ -1,6 +1,9 @@
 init:
 	python3 -m venv venv; source venv/bin/activate; pip install pandas; pip install matplotlib
 
+describe:
+	python srcs/plotter/describe.py datasets/dataset_train.csv
+
 plot:
 	python srcs/plotter/histogram.py datasets/dataset_train.csv
 	python srcs/plotter/scatter_plot.py datasets/dataset_train.csv
