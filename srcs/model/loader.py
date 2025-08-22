@@ -19,4 +19,23 @@ def getInputAndLabel(filename: str, cathegory: list):
                 except ValueError:
                     sample_features.append(0.0)
             features.append(sample_features)
-    return np.array(features, dtype=np.float32), np.array(labels, dtype=str)
+
+    inputs = np.array(features, dtype=np.float32)
+    return inputs, labels
+
+
+def getInput(filename: str, cathegory: list):
+    features = []
+
+    with open(filename, "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            sample = []
+            for key in cathegory:
+                try:
+                    sample.append(float(row[key]))
+                except:
+                    sample.append(0.0)
+            features.append(sample)
+
+    return np.array(features, dtype=np.float32)
