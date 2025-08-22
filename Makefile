@@ -11,3 +11,6 @@ train:
 
 infer:
 	python3 srcs/model/mainInfer.py datasets/dataset_test.csv 
+
+clean:
+	rm -fR *.npy
