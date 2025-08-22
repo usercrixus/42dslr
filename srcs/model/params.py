@@ -5,7 +5,7 @@ selectedCathegory = [
     "Defense Against the Dark Arts",
     "Astronomy",
     "Divination",
-    "Muggle Studies"
+    "Muggle Studies",
 ]
 
 labels = ["Ravenclaw", "Slytherin", "Hufflepuff", "Gryffindor"]

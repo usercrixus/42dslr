@@ -1,6 +1,3 @@
-init:
-	python3 -m venv venv; source venv/bin/activate; pip install pandas; pip install matplotlib
-
 describe:
 	python srcs/plotter/describe.py datasets/dataset_train.csv
 
@@ -14,7 +11,3 @@ train:
 
 infer:
 	python3 srcs/model/mainInfer.py datasets/dataset_test.csv 
-
-clean:
-	rm -fR histograms pair_plots scatter
-	rm -fR *.npy

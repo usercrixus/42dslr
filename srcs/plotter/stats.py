@@ -1,7 +1,6 @@
 import math
 
 
-# --- Statistic functions implemented from scratch ---
 def stat_count(values):
     """Return the number of values."""
     count = 0
