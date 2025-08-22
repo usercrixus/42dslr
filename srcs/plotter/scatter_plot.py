@@ -1,65 +1,76 @@
+# scatter.py
 import sys
-import os
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from loader import load_and_prepare
+from loader import getInputAndLabel
+from params import selectedCathegory
 
 
-def find_most_similar_features(df: pd.DataFrame) -> tuple[str, str, float]:
+def find_most_similar_features_by_correlation(
+    dataframe: pd.DataFrame,
+) -> tuple[str, str, float]:
     """
-    Compute the correlation matrix of numeric features in df,
-    ignore self-correlations, and return the pair of features
-    with the highest absolute correlation along with the correlation value.
+    Return the pair of feature names with the highest absolute Pearson correlation,
+    along with the signed correlation value.
     """
-    # Exclude Hogwarts House from feature correlations if present
-    feat_df = df.drop(columns=["Hogwarts House"], errors="ignore")
+    correlation = dataframe.corr(method="pearson")
+    abs_correlation = correlation.abs()
 
-    corr = feat_df.corr()
-    corr_abs = corr.abs()
-    # Zero out diagonal
-    for col in corr_abs.columns:
-        corr_abs.loc[col, col] = 0
+    # Ignore self-correlation on the diagonal
+    np.fill_diagonal(abs_correlation.values, np.nan)
 
-    feat_x, feat_y = corr_abs.unstack().idxmax()
-    corr_val = corr.loc[feat_x, feat_y]
-    return feat_x, feat_y, corr_val
+    # Find the location (row, col) of the maximum absolute correlation
+    max_location = np.unravel_index(
+        np.nanargmax(abs_correlation.values), abs_correlation.shape
+    )
+    feature_x = abs_correlation.index[max_location[0]]
+    feature_y = abs_correlation.columns[max_location[1]]
+
+    signed_corr_value = correlation.loc[feature_x, feature_y]
+    return feature_x, feature_y, float(signed_corr_value)
 
 
-def plot_scatter(df: pd.DataFrame, feat_x: str, feat_y: str, output_dir: str) -> str:
+def plot_scatter_for_features(
+    dataframe: pd.DataFrame, feature_x: str, feature_y: str, corr_value: float
+) -> None:
     """
-    Generate and save a basic scatter plot for feat_x vs feat_y in df.
-    Returns the filepath of the saved image.
+    Display a single scatter plot for feature_x vs feature_y.
     """
-    os.makedirs(output_dir, exist_ok=True)
-    filename = f"scatter_{feat_x.replace(' ', '_')}_{feat_y.replace(' ', '_')}.png"
-    filepath = os.path.join(output_dir, filename)
-
-    plt.figure(figsize=(8, 6))
-    plt.scatter(df[feat_x], df[feat_y], alpha=0.6)
-    plt.title(f"Scatter: {feat_x} vs {feat_y}")
-    plt.xlabel(feat_x)
-    plt.ylabel(feat_y)
-    plt.grid(True)
+    plt.figure(figsize=(9, 6))
+    plt.scatter(
+        dataframe[feature_x].to_numpy(),
+        dataframe[feature_y].to_numpy(),
+        alpha=0.6,
+        edgecolor="none",
+    )
+    plt.title(
+        f"Most similar features: {feature_x} vs {feature_y} (corr = {corr_value:.4f})"
+    )
+    plt.xlabel(feature_x)
+    plt.ylabel(feature_y)
+    plt.grid(True, alpha=0.3)
     plt.tight_layout()
-
-    plt.savefig(filepath, dpi=300, bbox_inches="tight")
-    plt.close()
-
-    return filepath
+    plt.show()
 
 
 def main():
     if len(sys.argv) != 2:
+        print("Usage: python3 scatter.py <dataset.csv>")
         return
-    df = load_and_prepare(sys.argv[1])
-
-    # Find most correlated features
-    feat_x, feat_y, corr_val = find_most_similar_features(df)
-    print(f"Most similar features: {feat_x} and {feat_y} (corr={corr_val:.6f})")
-
-    # Plot and save
-    saved_path = plot_scatter(df, feat_x, feat_y, "scatter")
-    print(f"Saved scatter plot to {saved_path}")
+    # Load numeric features and house labels using your project loader utilities
+    feature_matrix, _house_labels = getInputAndLabel(sys.argv[1], selectedCathegory)
+    # Wrap features with column names for clarity and correlation by name
+    dataframe = pd.DataFrame(feature_matrix, columns=selectedCathegory)
+    # 1) Find the most similar pair (highest absolute correlation)
+    feature_x, feature_y, corr_value = find_most_similar_features_by_correlation(
+        dataframe
+    )
+    print(
+        f"Most similar features: {feature_x} and {feature_y} (corr = {corr_value:.6f})"
+    )
+    # 2) Plot exactly one scatter answering the question
+    plot_scatter_for_features(dataframe, feature_x, feature_y, corr_value)
 
 
 if __name__ == "__main__":

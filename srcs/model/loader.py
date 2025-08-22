@@ -13,13 +13,11 @@ def getInputAndLabel(filename: str, cathegory: list):
             labels.append(label)
 
             sample_features = []
-            for key in row:
-                if key in cathegory:
-                    val = row[key]
-                    try:
-                        sample_features.append(float(val))
-                    except ValueError:
-                        sample_features.append(0.0)
+            for key in cathegory:
+                try:
+                    sample_features.append(float(row[key]))
+                except ValueError:
+                    sample_features.append(0.0)
             features.append(sample_features)
 
     inputs = np.array(features, dtype=np.float32)

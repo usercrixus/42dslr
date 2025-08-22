@@ -1,41 +1,41 @@
-import pandas as pd
+import csv
+import numpy as np
 
 
-def load_and_prepare(path):
-    """
-    Load CSV, convert types for specific columns:
-      - Birthday → epoch seconds (if present)
-      - Best Hand → 1/0 (if present)
-      - Hogwarts House → label-encoded (if present)
-      - coerce all other columns to numeric
-      - fill NaN with 0
-    """
-    df = pd.read_csv(path)
+def getInputAndLabel(filename: str, cathegory: list):
+    features = []
+    labels = []
 
-    # Convert Birthday column if it exists
-    if "Birthday" in df.columns:
-        df["Birthday"] = (
-            pd.to_datetime(df["Birthday"], errors="coerce").astype("int64") // 10**9
-        )
+    with open(filename, "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            label = row["Hogwarts House"]
+            labels.append(label)
 
-    # Map Best Hand if it exists
-    if "Best Hand" in df.columns:
-        df["Best Hand"] = df["Best Hand"].map({"Left": 1.0, "Right": 0.0})
+            sample_features = []
+            for key in cathegory:
+                try:
+                    sample_features.append(float(row[key]))
+                except ValueError:
+                    sample_features.append(0.0)
+            features.append(sample_features)
 
-    # Label encode Hogwarts House if present
-    if "Hogwarts House" in df.columns:
-        houses = sorted(df["Hogwarts House"].dropna().unique())
-        mapping = {h: i for i, h in enumerate(houses)}
-        df["Hogwarts House"] = df["Hogwarts House"].map(mapping)
+    inputs = np.array(features, dtype=np.float32)
+    return inputs, labels
 
-    # Coerce any object-typed columns into numeric (invalid parsing → NaN)
-    df = df.apply(
-        lambda col: pd.to_numeric(col, errors="coerce") if col.dtype == object else col
-    )
 
-    # Replace all NaNs with 0
-    df = df.drop(
-        columns=["Index", "First Name", "Last Name", "Best Hand"], errors="ignore"
-    )
-    
-    return df.fillna(0)
+def getInput(filename: str, cathegory: list):
+    features = []
+
+    with open(filename, "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            sample = []
+            for key in cathegory:
+                try:
+                    sample.append(float(row[key]))
+                except:
+                    sample.append(0.0)
+            features.append(sample)
+
+    return np.array(features, dtype=np.float32)

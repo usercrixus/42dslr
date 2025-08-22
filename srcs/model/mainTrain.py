@@ -18,7 +18,7 @@ if __name__ == "__main__":
     )
     model = LogisticRegression(inputDim=inputs.shape[1], labels=labels)
     model.train(
-        inputTrain, labelsTrain, inputVal, labelsVal, epochs=200, lr=0.01, batch_size=32
+        inputTrain, labelsTrain, inputVal, labelsVal, epochs=200, lr=0.1, batch_size=64
     )
 
     # Save model
