@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 from stats import STAT_FUNCS
 from loader import getInputAndLabel
-from params import selectedCathegory
+from params import validCathegory
 
 def format_statistics(df):
     df = df.drop(columns=["Hogwarts House"], errors="ignore")
@@ -18,8 +18,8 @@ def format_statistics(df):
 def main():
     if len(sys.argv) != 2:
         return
-    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], selectedCathegory)
-    data = pd.DataFrame(feature_matrix, columns=selectedCathegory)
+    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
+    data = pd.DataFrame(feature_matrix, columns=validCathegory)
     format_statistics(data)
 
 

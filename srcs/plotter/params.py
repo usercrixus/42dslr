@@ -1,4 +1,4 @@
-selectedCathegory = [
+validCathegory = [
     "Arithmancy",
     "Astronomy",
     "Herbology",

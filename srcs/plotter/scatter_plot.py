@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from loader import getInputAndLabel
-from params import selectedCathegory
+from params import validCathegory
 
 
 def find_most_similar_features_by_correlation(
@@ -45,8 +45,8 @@ def main():
     if len(sys.argv) != 2:
         print("Usage: python3 scatter.py <dataset.csv>")
         return
-    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], selectedCathegory)
-    dataframe = pd.DataFrame(feature_matrix, columns=selectedCathegory)
+    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
+    dataframe = pd.DataFrame(feature_matrix, columns=validCathegory)
     feature_x, feature_y, corr_value = find_most_similar_features_by_correlation(
         dataframe
     )

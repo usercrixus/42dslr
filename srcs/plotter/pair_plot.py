@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.plotting import scatter_matrix
 from loader import getInputAndLabel
-from params import selectedCathegory
+from params import validCathegory
 from sklearn.feature_selection import f_classif
 
 
@@ -63,8 +63,8 @@ def main():
     if len(sys.argv) != 2:
         print("Usage: python3 pairplot.py <dataset.csv>")
         return
-    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], selectedCathegory)
-    data = pd.DataFrame(feature_matrix, columns=selectedCathegory)
+    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
+    data = pd.DataFrame(feature_matrix, columns=validCathegory)
     houses = pd.Series(house_labels, name="Hogwarts House", dtype="string")
     plot(data, houses)
     f_scores = compute_anova_f_scores(data, houses)

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from loader import getInputAndLabel
-from params import selectedCathegory
+from params import validCathegory
 
 
 def compute_homogeneity_score(
@@ -33,7 +33,7 @@ def get_best_homogeneity_score(data: pd.DataFrame, house_labels: np.ndarray):
     most_homogeneous_score = None
     best_bin_edges = None
     best_unique_houses = None
-    for course_name in selectedCathegory:
+    for course_name in validCathegory:
         course_values = data[course_name].to_numpy()
         score, bin_edges, unique_houses = compute_homogeneity_score(
             course_values, house_labels, bins=20
@@ -86,8 +86,8 @@ def main():
     if len(sys.argv) != 2:
         print("Usage: python3 histogram.py <dataset.csv>")
         return
-    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], selectedCathegory)
-    data = pd.DataFrame(feature_matrix, columns=selectedCathegory)
+    feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
+    data = pd.DataFrame(feature_matrix, columns=validCathegory)
     (
         most_homogeneous_course_name,
         most_homogeneous_score,
