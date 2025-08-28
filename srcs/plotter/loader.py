@@ -20,3 +20,4 @@ def getInputAndLabel(filename: str, cathegory: list):
                     sample_features.append(0.0)
             features.append(sample_features)
     return np.array(features, dtype=np.float32), np.array(labels, dtype=str)
+
