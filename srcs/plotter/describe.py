@@ -5,7 +5,6 @@ from loader import getInputAndLabel
 from params import validCathegory
 
 def format_statistics(df):
-    df = df.drop(columns=["Hogwarts House"], errors="ignore")
     stats = {}
     for key, func in STAT_FUNCS.items():
         stats[key] = []
