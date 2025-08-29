@@ -7,10 +7,10 @@ plot:
 	python srcs/plotter/pair_plot.py datasets/dataset_train.csv
 
 train:
-	python3 srcs/model/mainTrain.py datasets/dataset_train.csv 
+	python3 srcs/model/logreg_train.py datasets/dataset_train.csv 
 
-infer:
-	python3 srcs/model/mainInfer.py datasets/dataset_test.csv 
+predict:
+	python3 srcs/model/logreg_predict.py datasets/dataset_test.csv 
 
 clean:
 	rm -fR *.npy
