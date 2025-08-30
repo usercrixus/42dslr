@@ -10,7 +10,7 @@ train:
 	python3 srcs/model/logreg_train.py datasets/dataset_train.csv 
 
 predict:
-	python3 srcs/model/logreg_predict.py datasets/dataset_test.csv 
+	python3 srcs/model/logreg_predict.py datasets/dataset_test.csv > houses.csv
 
 clean:
-	rm -fR *.npy
+	rm -fR *.npy houses.csv

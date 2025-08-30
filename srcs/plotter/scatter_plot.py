@@ -47,6 +47,8 @@ def main():
         return
     feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
     dataframe = pd.DataFrame(feature_matrix, columns=validCathegory)
+    # Replace NaNs with per-column median for correlation and plotting
+    dataframe = dataframe.fillna(dataframe.median(numeric_only=True))
     feature_x, feature_y, corr_value = find_most_similar_features_by_correlation(
         dataframe
     )

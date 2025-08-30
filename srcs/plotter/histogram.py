@@ -88,6 +88,8 @@ def main():
         return
     feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
     data = pd.DataFrame(feature_matrix, columns=validCathegory)
+    # Replace NaNs with per-column median for plotting
+    data = data.fillna(data.median(numeric_only=True))
     (
         most_homogeneous_course_name,
         most_homogeneous_score,

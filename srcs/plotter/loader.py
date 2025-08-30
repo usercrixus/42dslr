@@ -17,7 +17,7 @@ def getInputAndLabel(filename: str, cathegory: list):
                 try:
                     sample_features.append(float(row[key]))
                 except ValueError:
-                    sample_features.append(0.0)
+                    # Preserve missing/invalid numeric values as NaN for later handling
+                    sample_features.append(float("nan"))
             features.append(sample_features)
     return np.array(features, dtype=np.float32), np.array(labels, dtype=str)
-

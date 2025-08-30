@@ -4,3 +4,4 @@ pair_plots
 scatter
 **/__pycache__
 *.npy
+houses.csv

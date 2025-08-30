@@ -65,6 +65,8 @@ def main():
         return
     feature_matrix, house_labels = getInputAndLabel(sys.argv[1], validCathegory)
     data = pd.DataFrame(feature_matrix, columns=validCathegory)
+    # Replace NaNs with per-column median for plotting and ANOVA
+    data = data.fillna(data.median(numeric_only=True))
     houses = pd.Series(house_labels, name="Hogwarts House", dtype="string")
     plot(data, houses)
     f_scores = compute_anova_f_scores(data, houses)
