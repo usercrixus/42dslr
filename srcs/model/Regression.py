@@ -32,4 +32,6 @@ class Regression:
 
     @staticmethod
     def normalizeInfer(input: np.array, inputMean, inputStd):
-        return (input - inputMean) / (inputStd + 1e-8)
+        # inputStd already includes numerical epsilon from training time
+        # to ensure consistency between train and inference.
+        return (input - inputMean) / inputStd
